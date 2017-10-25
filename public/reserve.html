@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hot Restaurants</title>
+  <!-- Latest compiled and minified CSS & JS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+    
+        <div class="container">
+    
+            <div class="jumbotron">
+                <h1 class="text-center"><i class="glyphicon glyphicon-cutlery"></i> Hot Restaurants</h1>
+                <hr>
+                <h2 class="text-center">Make your reservation</h2>
+                <br>
+    
+                <div class="text-center">
+                    <a href="/tables"><button type="button" class="btn btn-lg btn-primary"><span class="glyphicon glyphicon-list-alt"></span> View Tables</button></a>
+                    <a href="/"><button type="button" class="btn btn-lg btn-default"><span class="glyphicon glyphicon-home"></span></button></a>
+                </div>
+            </div>
+    
+            <div class="row">
+                <div class="col-lg-12">
+    
+                    <!-- Reservation Page -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">Table Reservation</h4>
+                        </div>
+                        <div class="panel-body">
+    
+                            <form role="form">
+    
+                                <div class="form-group">
+                                    <label for="">Name</label>
+                                    <input type="text" class="form-control" id="reserve_name">
+                                </div>
+    
+                                <div class="form-group">
+                                    <label for="">Phone Number</label>
+                                    <input type="text" class="form-control" id="reserve_phone">
+                                </div>
+    
+                                <div class="form-group">
+                                    <label for="">Email</label>
+                                    <input type="text" class="form-control" id="reserve_email">
+                                </div>
+    
+                                <div class="form-group">
+                                    <label for="">Unique ID</label>
+                                    <input type="text" class="form-control" id="reserve_uniqueID">
+                                </div>
+    
+                                <button type="submit" class="btn btn-primary submit">Submit</button>
+                            </form>
+    
+                        </div>
+                    </div>
+    
+                </div>
+            </div>
+    
+    
+            <footer class="footer">
+              <div class="container">
+                <p><a href="/api/tables">API Table Link</a> | <a href="/api/waitlist">API Wait List</a> </p>
+              </div>
+            </footer>
+    
+        </div>
+    <!-- JavaScript -->
+    <script type="text/javascript">
+    // declare global variables
+    var name, phone, email, uniqueID, newPerson;
+
+    $('.submit').on('click', function(event) {
+        event.preventDefault();
+        // set global variable values for multiple uses in this and other functions, match with IDs
+        name = $('#name').val();
+        q1Val = parseInt($('#q1').val());
+        q2Val = parseInt($('#q2').val());
+        q3Val = parseInt($('#q3').val());
+        q4Val = parseInt($('#q4').val());
+        // new person object, contains their personal info and answers
+        newPerson = {
+            name: nameVal,
+            image: imageVal,
+            responses: [q1Val, q2Val, q3Val, q4Val, q5Val, q6Val, q7Val, q8Val, q9Val, q10Val],
+            total: q1Val + q2Val + q3Val + q4Val + q5Val + q6Val + q7Val + q8Val + q9Val + q10Val
+        };
+
+        // declare and set local variables
+        var modalTitle = $('.modal-title');
+        var modalBody = $('.modal-body');
+        var modal = $('#modal');
+        var apiFriendsRoute = '/api/friends';
+        //connect to API Friends route if user submits valid form
+        if (formIsValid()) {
+            $.get(apiFriendsRoute, function(data) {
+                var match = makeMatch(data);
+                // match with most compatile friend
+                if (match.name !== undefined) {
+                    modalTitle.text('You have a match!');
+                    modalBody.html('<p class="strong">You are most compatible with:</p><p>' + match.name + '</p><img src="' + match.image + '" height="45">');
+                // alert user that there are not enough friends in system
+            } else {
+                modalTitle.text('Too few friends');
+                modalBody.text('Sorry, there are too few friends to match you with.');
+            }
+            // reset form and POST new person to Friends API
+        }).then(function() {
+            modal.show();
+            $('.form')[0].reset();
+            $.post(apiFriendsRoute, newPerson);
+        });
+        // remind user to fill in all questions if error
+    } else {
+        modalTitle.text('Error');
+        modalBody.text('Please make sure all questions have been filled in.');
+        modal.show();
+    }
+});
+    // function indicate all questions have been answered
+    function formIsValid() {
+        return (nameVal !== '' && imageVal !== '' && !isNaN(q1Val) && !isNaN(q2Val) && !isNaN(q3Val) && !isNaN(q4Val) &&
+            !isNaN(q5Val) && !isNaN(q6Val) && !isNaN(q7Val) && !isNaN(q8Val) && !isNaN(q9Val) && !isNaN(q10Val));
+    }
+    // function to match user with most compatible friend
+    function makeMatch(data) {
+        var difference = 50;
+        var minName;
+        var minImage;
+        // absolute value of difference in scores will find most compatible friend
+        data.forEach(function(person) {
+            var localDiff = Math.abs(newPerson.total - person.total);
+            if (localDiff < difference) {
+                difference = localDiff;
+                minName = person.name;
+                minImage = person.image;
+            }
+        });
+        // show the most compatible friend's name and image
+        return {
+            name: minName,
+            image: minImage
+        };
+    }
+</script>
+
+    </body>
+    </html>
