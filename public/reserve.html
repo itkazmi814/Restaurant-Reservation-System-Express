@@ -82,75 +82,32 @@
     $('.submit').on('click', function(event) {
         event.preventDefault();
         // set global variable values for multiple uses in this and other functions, match with IDs
-        name = $('#name').val();
-        q1Val = parseInt($('#q1').val());
-        q2Val = parseInt($('#q2').val());
-        q3Val = parseInt($('#q3').val());
-        q4Val = parseInt($('#q4').val());
+        name = $('#reserve_name').val();
+        phone = parseInt($('#reserve_phone').val());
+        email = parseInt($('#reserve_email').val());
+        uniqueID = parseInt($('#reserve_uniqueID').val());
         // new person object, contains their personal info and answers
         newPerson = {
-            name: nameVal,
-            image: imageVal,
-            responses: [q1Val, q2Val, q3Val, q4Val, q5Val, q6Val, q7Val, q8Val, q9Val, q10Val],
-            total: q1Val + q2Val + q3Val + q4Val + q5Val + q6Val + q7Val + q8Val + q9Val + q10Val
+            name: name,
+            phone: phone,
+            email: email,
+            uniqueID: uniqueID
         };
 
-        // declare and set local variables
-        var modalTitle = $('.modal-title');
-        var modalBody = $('.modal-body');
-        var modal = $('#modal');
-        var apiFriendsRoute = '/api/friends';
-        //connect to API Friends route if user submits valid form
-        if (formIsValid()) {
-            $.get(apiFriendsRoute, function(data) {
-                var match = makeMatch(data);
-                // match with most compatile friend
-                if (match.name !== undefined) {
-                    modalTitle.text('You have a match!');
-                    modalBody.html('<p class="strong">You are most compatible with:</p><p>' + match.name + '</p><img src="' + match.image + '" height="45">');
-                // alert user that there are not enough friends in system
-            } else {
-                modalTitle.text('Too few friends');
-                modalBody.text('Sorry, there are too few friends to match you with.');
-            }
-            // reset form and POST new person to Friends API
-        }).then(function() {
-            modal.show();
-            $('.form')[0].reset();
-            $.post(apiFriendsRoute, newPerson);
-        });
-        // remind user to fill in all questions if error
-    } else {
-        modalTitle.text('Error');
-        modalBody.text('Please make sure all questions have been filled in.');
-        modal.show();
-    }
-});
+        $.post("/api/new", newPerson)
+
+        
+
+    }).then( function() {
+        $(".form")[0].reset();
+    });
+
     // function indicate all questions have been answered
     function formIsValid() {
-        return (nameVal !== '' && imageVal !== '' && !isNaN(q1Val) && !isNaN(q2Val) && !isNaN(q3Val) && !isNaN(q4Val) &&
-            !isNaN(q5Val) && !isNaN(q6Val) && !isNaN(q7Val) && !isNaN(q8Val) && !isNaN(q9Val) && !isNaN(q10Val));
+        return (name !== '' && phone !== '' &&  email !== "" && uniqueID !== '');
     }
-    // function to match user with most compatible friend
-    function makeMatch(data) {
-        var difference = 50;
-        var minName;
-        var minImage;
-        // absolute value of difference in scores will find most compatible friend
-        data.forEach(function(person) {
-            var localDiff = Math.abs(newPerson.total - person.total);
-            if (localDiff < difference) {
-                difference = localDiff;
-                minName = person.name;
-                minImage = person.image;
-            }
-        });
-        // show the most compatible friend's name and image
-        return {
-            name: minName,
-            image: minImage
-        };
-    }
+ 
+    
 </script>
 
     </body>
